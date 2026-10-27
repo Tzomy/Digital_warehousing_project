@@ -2,7 +2,7 @@
 
 Sizing and comparison of three robotic tote-based storage and retrieval systems for a 20,000-tote warehouse.
 
-> Project developed for the **Logistics – Advanced Project Work, a.y. 2025/26** course (University of Padua, Prof. Alessandro Persona).
+> Project developed for the **Logistics – Advanced Project Work, a.y. 2025/26** course (University of Padua, Prof. Alessandro Persona), with teammates: Davide Salvagno, Giacomo Squizzato, Anna Gianolla.
 
 ---
 
@@ -105,8 +105,6 @@ For each system (1, 2, 3) the design follows these steps:
 3. **Fleet sizing**: number of robots required to serve 200 totes IN + 200 totes OUT per hour, taking into account the 3 picking stations and the 12 m shelf-to-station distance.
 4. **Cost evaluation**: total investment on robots, based on the unit costs given in the specifications.
 5. **Comparison**: the three solutions are compared on fleet size, cost and operational flexibility.
-
-> **TODO:** add the exact formulas, assumptions (e.g. storage policy, command cycles, utilization targets) and any scripts/spreadsheets used.
 
 ---
 
