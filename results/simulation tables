@@ -1,0 +1,81 @@
+# Monte Carlo Simulation Results ($N = 1,000$ Runs per System)
+
+This document summarizes the statistical distributions and travel-time performance metrics extracted from the simulation runs (`MTSR_results.csv`, `AMR_results.csv`, and `CSRS_results.csv`).
+
+---
+
+## 1. Executive Summary Table
+
+| Metric | System 1: MTSR (`MTSR_results.csv`) | System 2: AMR (`AMR_results.csv`) | System 3: CSRS (`CSRS_results.csv`) |
+|---|:---:|:---:|:---:|
+| **Simulation Runs ($N$)** | 1,000 | 1,000 | 1,000 |
+| **Picks per Cycle (`NumPicks`)** | 8 | 1 | 1 |
+| **Mean Travel Distance (`Length_m`)** | $79.96\text{ m}$ | $29.06\text{ m}$ | $49.31\text{ m}$ |
+| **Std Dev Travel Distance** | $9.63\text{ m}$ | $13.09\text{ m}$ | $25.67\text{ m}$ |
+| **Min Travel Distance** | $33.60\text{ m}$ | $2.40\text{ m}$ | $1.00\text{ m}$ |
+| **25th Percentile Distance ($Q_1$)** | $72.00\text{ m}$ | $19.20\text{ m}$ | $28.20\text{ m}$ |
+| **Median Travel Distance ($Q_2$)** | $84.00\text{ m}$ | $31.20\text{ m}$ | $49.80\text{ m}$ |
+| **75th Percentile Distance ($Q_3$)** | $86.40\text{ m}$ | $38.40\text{ m}$ | $71.20\text{ m}$ |
+| **Max Travel Distance** | $96.00\text{ m}$ | $50.40\text{ m}$ | $98.00\text{ m}$ |
+| **Mean Simulated Travel Time (`Time_s`)** | $96.87\text{ s}$ | $18.14\text{ s}$ | $26.60\text{ s}$ |
+| **Std Dev Travel Time** | $12.59\text{ s}$ | $7.39\text{ s}$ | $9.19\text{ s}$ |
+| **Min Travel Time** | $42.40\text{ s}$ | $3.10\text{ s}$ | $2.00\text{ s}$ |
+| **25th Percentile Time ($Q_1$)** | $89.39\text{ s}$ | $12.40\text{ s}$ | $20.34\text{ s}$ |
+| **Median Travel Time ($Q_2$)** | $98.05\text{ s}$ | $20.78\text{ s}$ | $27.55\text{ s}$ |
+| **75th Percentile Time ($Q_3$)** | $105.58\text{ s}$ | $23.19\text{ s}$ | $33.60\text{ s}$ |
+| **Max Travel Time** | $126.36\text{ s}$ | $27.99\text{ s}$ | $45.00\text{ s}$ |
+| **Mean Travel Time per Pick ($\text{s/tote}$)** | **$12.11\text{ s}$** | **$18.14\text{ s}$** | **$26.60\text{ s}$** |
+| **Effective Speed (`Length_m / Time_s`)** | $0.83\text{ m/s}$ | $1.60\text{ m/s}$ | $1.85\text{ m/s}$ |
+| **Full Cycle Time $T(CC)$ (incl. handling & queue)** | **$482.20\text{ s}$** | **$88.40\text{ s}$** (AMR) / **$427.60\text{ s}$** (MTSR) | **$111.40\text{ s}$** |
+
+---
+
+## 2. Distance Band Distributions by Robot Type
+
+### 2.1 MTSR Multi-Tote Tours (`NumPicks = 8`, $N = 1,000$)
+
+| Tour Distance Band (`Length_m`) | Tours (Count) | Share (%) | Mean Distance ($\text{m}$) | Mean Travel Time ($\text{s}$) | Min Time ($\text{s}$) | Max Time ($\text{s}$) | Travel Time per Tote ($\text{s}$) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **30.0 – 50.0 m** | 16 | 1.6% | 46.80 | 64.91 | 42.40 | 74.53 | 8.11 |
+| **50.1 – 65.0 m** | 69 | 6.9% | 59.65 | 75.88 | 59.93 | 93.31 | 9.49 |
+| **65.1 – 75.0 m** | 190 | 19.0% | 70.64 | 86.84 | 68.80 | 106.59 | 10.86 |
+| **75.1 – 85.0 m** | 409 | 40.9% | 81.66 | 97.97 | 75.80 | 118.91 | 12.25 |
+| **85.1 – 96.0 m** | 316 | 31.6% | 89.29 | 106.51 | 84.80 | 126.36 | 13.31 |
+| **Total / Overall** | **1,000** | **100.0%** | **79.96** | **96.87** | **42.40** | **126.36** | **12.11** |
+
+### 2.2 AMR Horizontal Transport Trips (`NumPicks = 1`, $N = 1,000$, Step Size $= 2.4\text{ m}$)
+
+| Distance Band (`Length_m`) | Trips (Count) | Share (%) | Mean Distance ($\text{m}$) | Mean Travel Time ($\text{s}$) | Min Time ($\text{s}$) | Max Time ($\text{s}$) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **2.4 – 12.0 m** | 145 | 14.5% | 7.99 | 5.79 | 3.10 | 6.99 |
+| **14.4 – 24.0 m** | 212 | 21.2% | 19.34 | 13.91 | 7.59 | 19.18 |
+| **26.4 – 36.0 m** | 334 | 33.4% | 31.42 | 20.47 | 12.40 | 23.19 |
+| **38.4 – 50.4 m** | 309 | 30.9% | 43.08 | 24.33 | 15.40 | 27.99 |
+| **Total / Overall** | **1,000** | **100.0%** | **29.06** | **18.14** | **3.10** | **27.99** |
+
+### 2.3 CSRS Rack-Climbing Trips (`NumPicks = 1`, $N = 1,000$)
+
+| Distance Band (`Length_m`) | Trips (Count) | Share (%) | Mean Distance ($\text{m}$) | Mean Travel Time ($\text{s}$) | Min Time ($\text{s}$) | Max Time ($\text{s}$) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **1.0 – 25.0 m** | 212 | 21.2% | 14.33 | 14.12 | 2.00 | 24.90 |
+| **25.1 – 50.0 m** | 291 | 29.1% | 37.89 | 23.83 | 12.55 | 33.40 |
+| **50.1 – 75.0 m** | 286 | 28.6% | 62.11 | 31.14 | 18.55 | 40.20 |
+| **75.1 – 98.0 m** | 211 | 21.1% | 85.55 | 36.80 | 24.55 | 45.00 |
+| **Total / Overall** | **1,000** | **100.0%** | **49.31** | **26.60** | **2.00** | **45.00** |
+
+---
+
+## 3. Sample Raw Simulation Records (First 10 Runs per System)
+
+| Run ID | MTSR `NumPicks` | MTSR `Length_m` | MTSR `Time_s` | AMR `NumPicks` | AMR `Length_m` | AMR `Time_s` | CSRS `NumPicks` | CSRS `Length_m` | CSRS `Time_s` |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **1** | 8 | 88.8 | 109.76 | 1 | 36.0 | 23.19 | 1 | 15.6 | 18.19 |
+| **2** | 8 | 93.6 | 103.58 | 1 | 40.8 | 24.39 | 1 | 83.4 | 39.20 |
+| **3** | 8 | 69.6 | 80.58 | 1 | 24.0 | 18.59 | 1 | 48.0 | 26.55 |
+| **4** | 8 | 84.0 | 89.26 | 1 | 26.4 | 13.00 | 1 | 45.2 | 24.75 |
+| **5** | 8 | 76.8 | 107.39 | 1 | 45.6 | 25.59 | 1 | 3.6 | 5.29 |
+| **6** | 8 | 69.6 | 79.64 | 1 | 16.8 | 16.79 | 1 | 23.0 | 12.15 |
+| **7** | 8 | 84.0 | 112.44 | 1 | 21.6 | 17.99 | 1 | 52.8 | 31.35 |
+| **8** | 8 | 76.8 | 89.18 | 1 | 33.6 | 21.38 | 1 | 35.0 | 21.70 |
+| **9** | 8 | 88.8 | 93.20 | 1 | 31.2 | 21.99 | 1 | 27.6 | 22.74 |
+| **10** | 8 | 84.0 | 89.13 | 1 | 40.8 | 16.00 | 1 | 18.6 | 19.34 |
