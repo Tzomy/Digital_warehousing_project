@@ -1,0 +1,212 @@
+function AMRsimulator()
+% WAREHOUSESIMULATOR
+% Emula N missioni su magazzino a griglia, misura lunghezza e tempo.
+%
+% Modello dinamico: "Realistico" (CONTINUA)
+% - Solo movimenti ortogonali (no diagonali)
+% - Acc/dec solo ai cambi di direzione
+% - vmax = 4 m/s, a = 1 m/s² su X e Y
+%% Parametri di magazzino (dati dal tuo scenario)
+Nv = 8; % corsie verticali -> x in {0..Nv-1}
+Nh = 5; % corsie orizzontali -> y in {0..Nh-1}
+Lv = 8.4; % [m] passo verticale (tra nodi adiacenti in y)
+Lh = 1.2; % [m] passo orizzontale (tra nodi adiacenti in x)
+startNode = [0 2]; % tour: start=end
+endNode = [0 2];
+%% Parametri dinamica
+vmax = 4; % [m/s]
+acc = 1; % [m/s^2]
+%% Input da tastiera
+nSim = input('Quante simulazioni vuoi eseguire? ');
+nPicks = input('Quanti pick casuali per simulazione? (in teoria 1) ');
+if isempty(nSim) || nSim<=0, nSim=5; end
+if isempty(nPicks) || nPicks<=0, nPicks=1; end
+rng('shuffle'); % random
+%% Esecuzione simulazioni
+results = zeros(nSim, 4); % [simId, numPicks, tourLen_m, time_s]
+for s = 1:nSim
+ pickLocs = randomPickNodes(Nv, Nh, nPicks, startNode, endNode);
+ pts = [startNode; pickLocs];
+ M = size(pts,1);
+ % Matrice distanze (metri, Manhattan)
+ D = zeros(M,M);
+ for i=1:M
+ for j=1:M
+ if i==j, continue; end
+ dx = abs(pts(i,1)-pts(j,1));
+ dy = abs(pts(i,2)-pts(j,2));
+ D(i,j) = dx*Lh + dy*Lv;
+ end
+ end
+ % TSP Held–Karp (tour da 1 a 1)
+ [pathIdx, ~] = heldKarpTSP(D);
+ tourCoords = pts(pathIdx, :);
+ % Espansione in segmenti ortogonali
+ segs = expandOrthSegments(tourCoords, Lh, Lv);
+ segsMerged = mergeSameAxis(segs);
+ % Tempo totale (con fermata solo ai cambi asse)
+ totalTime = 0;
+ for k=1:numel(segsMerged)
+ L = segsMerged(k).len_m;
+ totalTime = totalTime + travelTimeStopTurn(L, vmax, acc);
+ end
+ % Salva risultati
+ results(s,:) = [s, nPicks, sum([segs.len_m]), totalTime];
+ fprintf('[Sim %d] Picks=%d | Lunghezza=%.2f m | Tempo=%.2f s\n', ...
+ s, nPicks, results(s,3), results(s,4));
+ if s == nSim
+ plotWarehouseTour(Nv, Nh, startNode, pickLocs, tourCoords);
+ title(sprintf('Sim %d | Length = %.2f m | Time = %.2f s', ...
+ s, results(s,3), results(s,4)));
+ end
+end
+%% Tabella finale (senza velocità media)
+T = table(results(:,1), results(:,2), results(:,3), results(:,4), ...
+ 'VariableNames', {'Sim','NumPicks','Length_m','Time_s'});
+disp('--- RISULTATI DELLE SIMULAZIONI ---');
+disp(T);
+%% Media del tempo di percorrenza
+meanTime = mean(results(:,4));
+fprintf('\nTempo medio di percorrenza su %d simulazioni: %.2f s\n', nSim, meanTime);
+meanDist = mean(results(:,3));
+fprintf('\nDistanza medio di percorrenza su %d simulazioni: %.2f m\n', nSim, meanDist);
+
+end
+% ========================= FUNZIONI LOCALI =============================
+function P = randomPickNodes(Nv, Nh, K, startNode, endNode)
+all = allGridCoords(Nv, Nh);
+mask = ~( (all(:,1)==startNode(1) & all(:,2)==startNode(2)) | ...
+ (all(:,1)==endNode(1) & all(:,2)==endNode(2)) );
+cand = all(mask, :);
+if K > size(cand,1)
+ error('Troppi pick richiesti rispetto ai nodi disponibili.');
+end
+perm = randperm(size(cand,1), K);
+P = cand(perm, :);
+end
+function C = allGridCoords(Nv, Nh)
+[X,Y] = meshgrid(0:Nv-1, 0:Nh-1);
+C = [X(:) Y(:)];
+end
+function [bestPathIdx, bestCost] = heldKarpTSP(D)
+M = size(D,1);
+if M==1
+ bestPathIdx = [1 1]; bestCost=0; return;
+end
+nSub = 2^(M-1);
+INF = 1e18;
+DP = INF*ones(nSub, M);
+PRE = zeros(nSub, M, 'uint16');
+for j=2:M
+ mask = bitset(0, j-1);
+ DP(mask+1, j) = D(1,j);
+ PRE(mask+1, j) = 1;
+end
+for mask=0:nSub-1
+ for j=2:M
+ if ~bitget(mask, j-1), continue; end
+ prevMask = bitclr(mask, j-1);
+ if prevMask==0, continue; end
+ for k=2:M
+ if ~bitget(prevMask, k-1), continue; end
+ cand = DP(prevMask+1,k) + D(k,j);
+ if cand < DP(mask+1,j)
+ DP(mask+1,j) = cand;
+ PRE(mask+1,j) = uint16(k);
+ end
+ end
+ end
+end
+fullMask = nSub-1;
+bestCost = INF; lastBest = 1;
+for j=2:M
+ cand = DP(fullMask+1, j) + D(j,1);
+ if cand < bestCost
+ bestCost = cand; lastBest = j;
+ end
+end
+pathRev = zeros(1, M);
+pathRev(1) = lastBest;
+mask = fullMask;
+for t=2:M
+ k = PRE(mask+1, pathRev(t-1));
+ pathRev(t) = k;
+ mask = bitclr(mask, pathRev(t-1)-1);
+ if mask==0, break; end
+end
+path = [1, fliplr(pathRev(1:find(pathRev==1,1,'last')-1)), 1];
+if path(end)~=1, path(end+1)=1; end
+bestPathIdx = path;
+end
+function y = bitclr(x, k)
+if k <= 0, y = x; return; end
+y = bitand(x, bitcmp(bitshift(uint32(1), k-1), 'uint32'));
+y = double(y);
+end
+function segs = expandOrthSegments(tourCoords, Lh, Lv)
+segs = struct('axis', {}, 'len_m', {});
+for k=1:size(tourCoords,1)-1
+ p = tourCoords(k,:);
+ q = tourCoords(k+1,:);
+ dx = q(1) - p(1);
+ dy = q(2) - p(2);
+ if dx ~= 0
+ segs(end+1).axis = 'H';
+ segs(end).len_m = abs(dx)*Lh;
+ end
+ if dy ~= 0
+ segs(end+1).axis = 'V';
+ segs(end).len_m = abs(dy)*Lv;
+ end
+end
+end
+function segs2 = mergeSameAxis(segs)
+if isempty(segs), segs2 = segs; return; end
+segs2 = segs(1);
+for i=2:numel(segs)
+ if segs(i).axis == segs2(end).axis
+ segs2(end).len_m = segs2(end).len_m + segs(i).len_m;
+ else
+ segs2(end+1) = segs(i);
+ end
+end
+end
+
+function t = travelTimeStopTurn(L, vmax, a)
+s_acc = vmax^2/(2*a);
+t = 0;
+if L <= 1.2
+    t = t + 1.533; % In the case of shorter distance we just add the time
+elseif L <= 2.4
+    t = t + 0.733;
+end
+
+if L >= 2*s_acc
+ t = 2*(vmax/a) + (L - 2*s_acc)/vmax;
+else
+ v_peak = sqrt(a*L);
+ t = 2*(v_peak/a);
+end
+end
+
+function plotWarehouseTour(Nv, Nh, startNode, pickLocs, tourCoords)
+figure; hold on; axis equal;
+for x=0:Nv-1, plot([x x],[0 Nh-1],'k:'); end
+for y=0:Nh-1, plot([0 Nv-1],[y y],'k:'); end
+all = allGridCoords(Nv, Nh);
+plot(all(:,1), all(:,2), 'o', 'MarkerSize', 4, 'Color', [0.6 0.6 0.6]);
+plot(startNode(1), startNode(2), 'gs', 'MarkerFaceColor','g', 'MarkerSize', 10);
+plot(pickLocs(:,1), pickLocs(:,2), 'r^', 'MarkerFaceColor','r', 'MarkerSize', 8);
+for k = 1:size(tourCoords,1)-1
+ p = tourCoords(k,:); q = tourCoords(k+1,:);
+ if p(1)~=q(1)
+ plot([p(1) q(1)], [p(2) p(2)], 'LineWidth', 2);
+ end
+ if p(2)~=q(2)
+ plot([q(1) q(1)], [p(2) q(2)], 'LineWidth', 2);
+ end
+end
+legend({'grid','','','start','pick','tour'}, 'Location','bestoutside');
+hold off;
+end
+
