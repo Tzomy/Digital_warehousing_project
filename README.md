@@ -2,7 +2,7 @@
 
 Sizing and comparison of three robotic tote-based storage and retrieval systems for a 20,000-tote warehouse.
 
-> Project developed for the **Logistics – Advanced Project Work, a.y. 2025/26** course (University of Padua, Prof. Alessandro Persona), with teammates: Davide Salvagno, Giacomo Squizzato, Anna Gianolla.
+> Project developed for the **Logistics – Advanced Project Work, a.y. 2025/26** course (University of Padua, Prof. Alessandro Persona), with teammates: Anna Gianolla, Bruktawit Mekonnen, Davide Salvagno, Giacomo Squizzato, Tommaso Pintonato.
 
 ---
 
@@ -114,20 +114,27 @@ For each system (1, 2, 3) the design follows these steps:
 
 | | System 1: MTSR | System 2: MTSR + AMR | System 3: CSRS |
 |---|:---:|:---:|:---:|
-| Storage floors | TBD | TBD | TBD |
-| Modules per aisle | TBD | TBD | TBD |
-| Warehouse length (m) | TBD | TBD | TBD |
-| Warehouse width (m) | TBD | TBD | TBD |
-| Warehouse height (m) | TBD | TBD | TBD |
+| Storage floors | 16[cite: 2] | 15 (16 total; floor 1 = exchange)[cite: 2] | 15 (lowest floor absent)[cite: 2] |
+| Modules per aisle | 40 (20 per rack side) | 42 (21 per rack side) | 42 (21 per rack side) |
+| Length of shelves (m) | 46.8 | 48.9 | 44.1[cite: 1] |
+| Width of shelves (m) | 19.2[cite: 1] | 19.2[cite: 1] | 19.2[cite: 1] |
+| Total warehouse area (m²) | 4,474.56[cite: 2] | 4,607.88[cite: 2] | 4,304.72[cite: 2] |
+| Warehouse height (m) | 8.0 | 8.0 | 8.0 |
+| Cycle time $T(CC)$ (s) | 482.2[cite: 1] | 427.6 (MTSR) / 88.4 (AMR)[cite: 1] | 111.4[cite: 1] |
 
 ### Robot fleet and investment
 
 | | System 1: MTSR | System 2: MTSR + AMR | System 3: CSRS |
 |---|:---:|:---:|:---:|
-| Number of MTSRs | TBD | TBD | – |
-| Number of AMRs | – | TBD | – |
-| Number of CSRS robots | – | – | TBD |
-| **Total robot cost (€)** | TBD | TBD | TBD |
+| Number of MTSRs | 6 (+ 1 spare)[cite: 1, 2] | 4 (+ 1 spare)[cite: 1, 2] | – |
+| Number of AMRs | – | 8 (+ 1 spare)[cite: 1, 2] | – |
+| Number of CSRS robots | – | – | 12 (+ 3 charging)[cite: 1, 2] |
+| **Total robot cost (€)** | **€360,000** (€420,000 incl. spare)[cite: 2] | **€296,000** (€363,000 incl. spares)[cite: 2] | **€240,000** (€300,000 incl. charging)[cite: 2] |
+| Area cost (€350/m²) | €1,566,096[cite: 2] | €1,612,758[cite: 2] | €1,506,652[cite: 2] |
+| Shelving structure cost (€) | €1,500,000[cite: 2] | €1,500,000[cite: 2] | €1,500,000[cite: 2] |
+| Workstations cost (3 units) (€) | €300,000[cite: 2] | €300,000[cite: 2] | €300,000[cite: 2] |
+| Additional equipment cost (€) | €5,000 (1 battery pack)[cite: 2] | – | €800,000 (vertical rails)[cite: 2] |
+| **Total System Investment (€)** | **€3,791,096**[cite: 2] | **€3,775,758**[cite: 2] | **€4,106,952**[cite: 2] |
 
 ---
 
@@ -137,11 +144,15 @@ The three technologies are compared in general terms with respect to:
 
 | Criterion | MTSR | MTSR + AMR | CSRS |
 |-----------|------|------------|------|
-| **a) Peaks of demand** | TBD | TBD | TBD |
-| **b) Item classes A, B, C (picking frequency)** | TBD | TBD | TBD |
-| **c) Size of customer orders** | TBD | TBD | TBD |
-| **d) Throughput levels** | TBD | TBD | TBD |
-| **e) Sequencing constraints on SKU arrival at picking stations** | TBD | TBD | TBD |
+| **a) Peaks of demand** | Lower flexibility; high unit cost (€60k/robot) makes scaling fleet size for short-term peaks expensive[cite: 2]. | High flexibility on horizontal transport (inexpensive AMRs at €7k/robot), though aisle retrieval remains bounded by MTSR capacity[cite: 2]. | High flexibility; intermediate robot cost (€20k) and single-tote modularity allow extra climbing robots to be added easily[cite: 2]. |
+| **b) Item classes A, B, C (picking frequency)** | Best paired with class-based storage (high-turnover A items near the front/lower levels) to minimize multi-stop tour lengths. | Very effective with class-based storage; placing A-items near the bottom exchange floor minimizes MTSR vertical travel. | Less sensitive to vertical/horizontal skew due to fast ground speed ($4\text{ m/s}$), though class-based zoning reduces rail congestion. |
+| **c) Size of customer orders** | **Directly influenced by customer order size**; requires batching 6 to 8 totes per trip to amortize horizontal travel and achieve target throughput[cite: 1]. | Moderately influenced; MTSRs still batch within aisles while AMRs decouple single-tote delivery to picking stations. | Independent of order size; single-tote cycles handle both single-line and multi-line orders without batching delays. |
+| **d) Throughput levels** | Suited for medium-to-high throughput when tray utilization (6–8 totes/trip) is consistently high[cite: 1]. | High throughput capability; decoupling vertical storage from horizontal transport reduces MTSR cycle time from $482.2\text{ s}$ to $427.6\text{ s}$[cite: 1]. | High, scalable throughput ($T(CC) = 111.4\text{ s}$ per tote), limited only by aisle/rail traffic density at very large fleet sizes[cite: 1]. |
+| **e) Sequencing constraints on SKU arrival at picking stations** | Rigid; 8-tote batch retrieval makes strict SKU arrival sequencing complex and requires buffering/sorting at the carousel. | High sequencing capability; the lowest-floor exchange buffer allows AMRs to dispatch totes to stations in the exact required sequence. | Very high sequencing capability; individual robots retrieve and deliver single totes directly in the required order sequence. |
+
+---
+
+## Repository Structure
 
 ---
 
@@ -150,7 +161,6 @@ The three technologies are compared in general terms with respect to:
 ```
 .
 ├── README.md
-├── docs/          # Project brief, report, presentation, video
 ├── model/         # Cycle-time and fleet sizing models (scripts / spreadsheets)
 └── results/       # Output tables and charts
 ```
@@ -173,9 +183,3 @@ The three technologies are compared in general terms with respect to:
 | Hybrid MTSR–AMR warehouse system with class-based storage policies: modeling and performance evaluation | I. Granata, M. Faccio, A. Persona | 2025 | MTSR + AMR |
 
 ---
-
-## Team
-
-| Name | Role |
-|------|------|
-| TBD | TBD |
