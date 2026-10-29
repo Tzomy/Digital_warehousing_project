@@ -183,3 +183,10 @@ The three technologies are compared in general terms with respect to:
 | Hybrid MTSR–AMR warehouse system with class-based storage policies: modeling and performance evaluation | I. Granata, M. Faccio, A. Persona | 2025 | MTSR + AMR |
 
 ---
+
+## Team
+- Anna Gianolla
+- Bruktawit Mekonnen
+- Davide Salvagno
+- Giacomo Squizzato
+- Tommaso Pintonato
